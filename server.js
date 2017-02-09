@@ -6,12 +6,12 @@ const Mustache = require('mustache')
 const Request = require('request')
 const Querystring = require('querystring')
 const app = express()
-const path = require("path")
+const path = require('path')
+const formidable = require('formidable')
 
-app.use(express.static(path.join(__dirname,'/public')))
+app.use(express.static(path.join(__dirname, '/public')))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-
 
 let csrf_guid = Guid.raw()
 const api_version = 'v1.0'
@@ -83,7 +83,7 @@ app.post('/sendcode', function (request, response) {
         expires_at: respBody.expires_at,
         user_id: respBody.id
       }
-      //var id = respBody.id
+      // var id = respBody.id
       // get account details at /me endpoint
       let me_endpoint_url = me_endpoint_base_url + '?access_token=' + respBody.access_token
       Request.get({url: me_endpoint_url, json: true }, function (err, resp, respBody) {
@@ -102,8 +102,7 @@ app.post('/sendcode', function (request, response) {
           } else {
             let html = Mustache.to_html(loadHomePage(), view)
             response.send(html)
-         }
-
+          }
         //  connection.end()
         })
       })
@@ -115,7 +114,6 @@ app.post('/sendcode', function (request, response) {
   }
 })
 
-
 app.post('/senddata', function (request, response) {
   connection.query('UPDATE login SET name = ? WHERE id = ?', [request.body.name, request.body.id])
   let view = {
@@ -123,12 +121,37 @@ app.post('/senddata', function (request, response) {
   }
   let html = Mustache.to_html(loadHomePage(), view)
   response.send(html)
-  //connection.end()
+  // connection.end()
 })
 
-app.get('/test',(req,res)=>{
+app.get('/test', (req, res) => {
   let html = Mustache.to_html(loadHomePage())
   res.send(html)
+})
+
+app.get('/gettransaction', (req, res) => {
+  console.log(req.body)
+  res.send({
+    transactions:[
+      {
+        id: 1,
+        bank: 'SBI'
+      }, {
+        id: 2,
+        bank: 'HDFC'
+      }, {
+        id: 3,
+        bank: 'ICICI'
+      }
+    ]}
+  )
+})
+
+app.post('/upload', (req, res) => {
+  var form = new formidable.IncomingForm()
+  form.parse(req, function(err, fields, files) {
+    console.log(files)
+  })
 })
 
 app.listen(3000)

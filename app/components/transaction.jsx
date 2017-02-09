@@ -1,11 +1,14 @@
-let React = require('react')
+const React = require('react')
 
-let Transaction = React.createClass({
+const Transaction = React.createClass({
   render: function () {
     let {id, bank} = this.props
     return (
-      <div className="box-style">
-        {id}. {bank}
+      <div className='card'>
+        <div className='card-section'>
+            {id}. {bank}
+        </div>
+
       </div>
     )
   }

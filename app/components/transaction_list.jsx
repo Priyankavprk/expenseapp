@@ -1,11 +1,11 @@
-let React = require('react')
-let Transaction = require('Transaction')
+const React = require('react')
+const Transaction = require('Transaction')
 
-let TransactionList = React.createClass({
+const TransactionList = React.createClass({
   render: function () {
     let {transactions} = this.props
     let renderTransactions = () => {
-       return transactions.map((transaction) => {
+      return transactions.map((transaction) => {
         return (
           <Transaction key={transaction.id} {...transaction}/>
         )

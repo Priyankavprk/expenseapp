@@ -1,32 +1,17 @@
-let React = require('react')
-let Nav = require('Nav')
-let TransactionList = require('TransactionList')
+const React = require('react')
+const Nav = require('Nav')
 
-let Main = React.createClass({
-  getInitialState: function () {
-    return {
-      transactions: [
-        {
-          id: 1,
-          bank: 'SBI'
-        }, {
-          id: 2,
-          bank: 'HDFC'
-        }
-      ]
-    }
-  },
+const Main = React.createClass({
   render: function () {
-    let {transactions} = this.state
     return (
       <div>
         <Nav/>
-        <div className="row">
-          <div className="column small-centered small-11 medium-6 large-5 main">
-              <TransactionList transactions={transactions}/>
-          </div>
+      <div className='row'>
+        <div className='coloumns medium-6 large-4 small-centered main'>
+            {this.props.children}
         </div>
-       </div>
+      </div>
+      </div>
     )
   }
 })

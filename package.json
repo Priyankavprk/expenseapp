@@ -4,7 +4,9 @@
   "dependencies": {
     "body-parser": "^1.15.0",
     "express": "3.x",
+    "formidable": "^1.1.1",
     "guid": "0.0.12",
+    "io-square-browser": "0.0.7",
     "mustache": "^2.2.1",
     "mysql": "^2.13.0",
     "path": "^0.12.7",
