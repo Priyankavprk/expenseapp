@@ -27,7 +27,9 @@ module.exports = {
       Nav: 'app/components/nav.jsx',
       TransactionList: 'app/components/transaction_list.jsx',
       Transaction: 'app/components/transaction.jsx',
-      Import: 'app/components/import.jsx',
+      Upload: 'app/components/upload.jsx',
+      Tdetail: 'app/components/tdetail.jsx',
+      AddTransaction: 'app/components/addtransaction.jsx',
       applicationStyles: 'app/styles/app.scss'
     },
     extensions: ['', '.js', '.jsx']

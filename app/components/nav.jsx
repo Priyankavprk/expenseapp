@@ -9,8 +9,9 @@ const Nav = React.createClass({
             <ul className='menu'>
               <li className='menu-text'>ExpenseApp</li>
               <li><IndexLink to='/' activeClassName='active' activeStyle={{fontWeight: 'bold'}}>Transactions</IndexLink></li>
-              <li><Link to='/import' activeClassName='active' activeStyle={{fontWeight: 'bold'}}>Import</Link></li>
-            </ul>
+              <li><Link to='/upload' activeClassName='active' activeStyle={{fontWeight: 'bold'}}>Upload</Link></li>
+              <li><Link to='/addtransaction' activeClassName='active' activeStyle={{fontWeight: 'bold'}}>Add Transaction</Link></li>
+             </ul>
           </div>
         </div>
       )

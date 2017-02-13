@@ -16,7 +16,7 @@ const TMain = React.createClass({
       ]
     }
   },*/
-  componentDidMount: function () {
+  componentWillMount: function () {
     getJSON('/gettransaction').then((response) => {
       this.setState(
         {transactions: response.transactions}
