@@ -2,21 +2,21 @@ const React = require('react')
 const Tdetail = require('Tdetail')
 
 const Transaction = React.createClass({
-  getInitialState: function () {
-    return {
+  componentWillMount: function () {
+    this.setState({
       showDetail: false
-    }
+    })
   },
   handleClick: function () {
     this.setState({
-      showDetail: (!this.showDetail)
+      showDetail: (!this.state.showDetail)
     })
   },
   render: function () {
-    let {tID, tDate, tDetails, tAmount, bal} = this.props
+    let {tID, tDate, tDetails, tAmount, bal, toAcc, fromAcc} = this.props
     return (
-      <div className='card box-style' onClick={this.handleClick}>
-        <div className='card-divider'>
+      <div className='card box-style'  style={{width: '100%', paddingTop: '0.5%'}} onClick={this.handleClick}>
+        <div className='card-divider' style={{marginTop: '3%'}}>
           Bank
         </div>
         <div className='card-section'>
@@ -27,14 +27,14 @@ const Transaction = React.createClass({
             </div>
             <div className='row'>
               <div className='small-6 columns'>
-                {tAmount}
+                Amount: {tAmount}
               </div>
-              <div className='small-6 columns float-right bal'>
-                {bal}
+              <div className='small-6 columns'>
+                Balance: {bal}
               </div>
             </div>
           </div>
-        {this.state.showDetail ? <Tdetail id={tID} tDetail={tDetails}/> : null}
+        {this.state.showDetail ? <Tdetail id={tID} tDetail={tDetails} toAcc={toAcc} fromAcc={fromAcc}/> : null}
       </div>
     )
   }

@@ -3,19 +3,6 @@ const TransactionList = require('TransactionList')
 const {getJSON} = require('io-square-browser')
 
 const TMain = React.createClass({
-  /*getInitialState: function () {
-    return {
-      transactions: [
-        {
-          id: 1,
-          bank: 'SBI'
-        }, {
-          id: 2,
-          bank: 'HDFC'
-        }
-      ]
-    }
-  },*/
   componentWillMount: function () {
     getJSON('/gettransaction').then((response) => {
       this.setState(

@@ -57,29 +57,32 @@ app.use(bodyParser.json())
 app.use(con)
 app.use(express.static(__dirname + '/public'))
 
+app.post('/sendcode', login)
+app.post('/getin', getin)
+app.post('/senddata', registerName)
+app.get('/gettransaction', displayTx)
+app.post('/upload', multer({ dest: './uploads/'}).single('upl'), uploadFiles)
+app.post('/addTransaction', addTx)
+app.post('/updatedate', updateTo)
+app.get('/', initialize)
+
 app.listen(3000, () => console.log('Listening at port 3k'))
 
-const loadLogin = () => fs.readFileSync('public/login.html').toString()
+loadLogin = () => fs.readFileSync('public/login.html').toString()
+loadLoginSuccess = () => fs.readFileSync('public/login_success.html').toString()
+loadRegister = () => fs.readFileSync('public/register.html').toString()
+loadHomePage = () => fs.readFileSync('public/home.html').toString()
 
-const loadLoginSuccess = () => fs.readFileSync('public/login_success.html').toString()
-
-const loadRegister = () => fs.readFileSync('public/register.html').toString()
-
-const loadHomePage = () => fs.readFileSync('public/home.html').toString()
-
-app.post('/sendcode', login)
-
-function login (request, response) {
+function login (req, res) {
   // CSRF check
-  if (request.body.csrf_nonce === csrf_guid) {
+  if (req.body.csrf_nonce === csrf_guid) {
     var app_access_token = ['AA', app_id, app_secret].join('|')
     var params = {
       grant_type: 'authorization_code',
-      code: request.body.code,
+      code: req.body.code,
       access_token: app_access_token
       // appsecret_proof: app_secret
     }
-
     // exchange tokens
     let token_exchange_url = token_exchange_base_url + '?' + Querystring.stringify(params)
     Request.get({url: token_exchange_url, json: true}, function (err, resp, respBody) {
@@ -96,20 +99,20 @@ function login (request, response) {
           view.method = 'SMS'
           view.identity = respBody.phone.number
         }
-        request.getConnection((err, connection) => {
+        req.getConnection((err, connection) => {
           if (err) {
             console.log('Connection Error')
             return err
           }
-          request.session.user = respBody.phone.national_number
+          req.session.user = respBody.phone.national_number
         connection.query('SELECT name FROM login WHERE fbSign = ?', respBody.id, function (err, rows) {
           if (rows.length === 0 || rows[0].name === null) {
-            connection.query('INSERT INTO login VALUES (?, ?, ?, ?)', [respBody.id, null, null, respBody.phone.national_number])
+            connection.query('INSERT INTO login VALUES (?, ?, ?, ?)', [respBody.id, req.session.id, null, respBody.phone.national_number])
             var html = Mustache.to_html(loadRegister(), view)
-            response.send(html)
+            res.send(html)
           } else {
             let html = Mustache.to_html(loadHomePage(), view)
-            response.send(html)
+            res.send(html)
           }
         })
       })
@@ -117,43 +120,43 @@ function login (request, response) {
     })
   } else {
     // login failed
-    response.writeHead(200, {'Content-Type': 'text/html'})
-    response.end('Something went wrong. :( ')
+    res.writeHead(200, {'Content-Type': 'text/html'})
+    res.end('Something went wrong. :( ')
   }
-
 }
 
+function getin (req, res) {
+  req.session.user = 201320543668190
+  let html = Mustache.to_html(loadHomePage())
+  res.send(html)
+}
 
-app.post('/senddata', function (request, response) {
-  request.getConnection((err, connection) => {
-    if (err) {
-      console.log('Connection Error')
-      return err
-    }
-  connection.query('UPDATE login SET name = ? WHERE fbSign = ?', [request.body.name, request.body.id])
-  let view = {
-
-  }
-  let html = Mustache.to_html(loadHomePage(), view)
-  response.send(html)
-  })
-})
-//
-// app.get('/test', (req, res) => {
-//   let html = Mustache.to_html(loadHomePage())
-//   res.send(html)
-// })
-//
-
-app.get('/gettransaction', (req, res) => {
-  const id = req.session.user
-  console.log(req.session.id)
+function registerName (req, res) {
   req.getConnection((err, connection) => {
     if (err) {
       console.log('Connection Error')
       return err
     }
-    connection.query('SELECT * FROM icici WHERE uID = ?', id, (err, rows) => {
+  connection.query('UPDATE login SET name = ? WHERE fbSign = ?', [req.body.name, req.body.id])
+  let view = {
+
+  }
+  let html = Mustache.to_html(loadHomePage(), view)
+  res.send(html)
+  })
+}
+
+function displayTx (req, res) {
+  const id = req.session.user
+  req.getConnection((err, connection) => {
+    if (err) {
+      console.log('Connection Error')
+      return err
+    }
+    connection.query(`SELECT * FROM icici WHERE fbSign = ?
+      UNION
+      SELECT * FROM transactions WHERE fbSign = ?
+      `, [id, id], (err, rows) => {
       if (err) {
         console.log('Connection error. Pleas try again later')
         return null
@@ -167,16 +170,9 @@ app.get('/gettransaction', (req, res) => {
       })
     })
   })
-})
+}
 
-app.post('/upload', (req, res) => {
-  var form = new formidable.IncomingForm()
-  form.parse(req, function(err, fields, files) {
-    console.log(files)
-  })
-})
-
-app.get('/', (req, res) => {
+function initialize (req, res) {
   const view = {
     appId: app_id,
     csrf: csrf_guid,
@@ -184,4 +180,89 @@ app.get('/', (req, res) => {
   }
   const html = Mustache.to_html(loadLogin(), view)
   res.send(html)
-})
+}
+
+function uploadFiles (req, res) {
+  const bank = req.body.bank
+  const fbSign = req.session.user
+  const parser = require(__dirname + '/scripts/parser')
+  const data = parser()
+  let  tDate, tType, tAmount, tDetails, bal, tCr, tDb
+  console.log(bank)
+
+
+ req.getConnection((err, connection) => {
+    if (err) {
+      console.log('Connection Error')
+      return err
+    }
+    for (let i = 0; i < data.length; i++) {
+      if (bank === 'icici') [ , , tDate, chqNo, tDetails, tDb, tCr, bal] = data[i];
+       if (bank === 'federal') [ , tDate, tDetails, , , , , tDb, tCr, bal] = data[i];
+      if (tDb == 0) {
+        tType = 'CREDIT'
+        tAmount = tCr
+      } else {
+        tType = 'DEBIT'
+        tAmount = tDb
+      }
+      if (tDetails.substr(0, 3) === 'ATM' || tDetails.substr(0, 3) === 'NFS') tType = 'CREDIT'
+      console.log(fbSign, tDate, tDetails, tAmount, tType, bal)
+      connection.query('INSERT INTO ' + bank + ' (fbSign, tDate, tDetails, tAmount, tType, bal)' +
+      'VALUES (?, ?, ?, ?, ?, ?)',
+      [fbSign, tDate, tDetails, tAmount, tType, bal], (err, rows) => {
+        if (err || rows.affectedRows === 0) {
+          console.log('Connection Error. Please try again later.')
+          console.log(err)
+          return null
+        }
+      })
+    }
+  })
+}
+
+function addTx (req, res) {
+  const data = req.body
+  let [fbSign, tDate, toAcc, fromAcc, tType, tAmount, tDetails] = [req.session.user, data.tDate, data.toAcc, data.fromAcc, data.tType, data.tAmount, data.tDetails]
+  let bal = 0
+  console.log(req.session.user, data.tDate, data.toAcc, data.fromAcc, data.tType, data.tAmount, data.tDetails)
+  req.getConnection((err, connection) => {
+    if (err) {
+      console.log('Connection Error')
+      return err
+    }
+    connection.query(`SELECT bal FROM transactions WHERE fbSign = ?
+      ORDER BY tID DESC LIMIT 1`,
+    fbSign, (err, rows) => {
+      if (err) {
+        console.log('Connection Error. Please try again later.')
+        return err
+      }
+      console.log(rows)
+      if (rows.length !== 0) bal = parseInt(rows[0].bal)
+      if (tType == 'CREDIT' || tType == 'credit') {
+        bal += parseInt(tAmount)
+        console.log("if balance", bal)
+        console.log(typeof bal)
+      }
+      else {
+        bal -= parseInt(tAmount)
+        console.log("balance", bal)
+        console.log(typeof bal)
+      }
+      connection.query(`INSERT INTO transactions (fbSign, tDate, fromAcc, toAcc, tType, tAmount, tDetails, bal)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [fbSign, tDate, fromAcc, toAcc, tType, tAmount, tDetails, bal], (err, rows) => {
+        if (err || rows.affectedRows === 0) {
+          console.log('Connection Error. Please try again later.')
+          console.log(err)
+          return null
+        }
+      })
+    })
+  })
+}
+
+function updateTo (req, res) {
+  const id = req.session.user
+}

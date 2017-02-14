@@ -8,7 +8,11 @@ const Import = React.createClass({
        <div className='row'>
          <div className='coloumns small-centered main'>
            <form name='form1' method='post' encType='multipart/form-data' action='/upload'>
-             <input type='file' name= 'file' id='file'className='inputfile' name='file'/>
+             <input type='file' name= 'upl' id='file'className='inputfile'/>
+               <select name='bank'>
+                 <option value='icici'>ICICI</option>
+                 <option value='federal'>FEDERAL</option>
+               </select>
              <button className='button expanded btn'>Submit</button>
            </form>
          </div>

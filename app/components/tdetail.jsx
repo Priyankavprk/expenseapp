@@ -5,63 +5,67 @@ const Tdetail = React.createClass({
   handleRadio: function (e) {
     let bank = this.refs.bank.checked
     let cash = this.refs.cash.checked
-    let asset = this.refs.asset.checked
-    let share = this.refs.share.checked
-    let income = this.refs.income.checked
     let expense = this.refs.expense.checked
+    let id = this.props.id
+    let fromAcc = this.props.fromAcc
+    console.log(id,fromAcc)
+    let obj = {}
     if (bank) {
-      postJSON('/updatedata', 'bank')
+      obj = {
+        tID: id,
+        toAcc: 'bank',
+        fromAcc: fromAcc
+      }
     } else if (cash) {
-      postJSON('/updatedata', 'cash')
-    } else if (asset) {
-      postJSON('/updatedata', 'asset')
-    } else if (share) {
-      postJSON('/updatedata', 'share')
-    } else if (income) {
-      postJSON('/updatedata', 'income')
+      obj = {
+        tID: id,
+        toAcc: 'cash',
+        fromAcc: fromAcc
+      }
     } else {
-      postJSON('/updatedata', 'expense')
+      obj = {
+        tID: id,
+        toAcc: 'expense',
+        fromAcc: fromAcc
+      }
     }
+    postJSON('/updatedata', obj)
   },
   render: function () {
-    let id = this.props.id
     let tDetail = this.props.tDetail
+    let toAcc = this.props.toAcc
+    let renderUpdate = () => {
+      if (toAcc) {
+        return (
+          <div>
+            <div className=''>
+              <div className='row'>
+                <label>
+                  <input type='radio' name='value' value='bank' ref='bank' onChange={this.handleRadio}/> Bank Account
+                </label>
+              </div>
+              <div className='row'>
+                <label>
+                  <input type='radio' name='value' ref='cash' onChange={this.handleRadio}/> Cash Account
+                </label>
+              </div>
+              <div className='row'>
+                <label>
+                  <input type='radio' name='value' ref='expense' onChange={this.handleRadio}/> Expense
+                </label>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    }
     return (
       <div>
         <div className='small-9 columns'>
           <div className='row'>
             {tDetail}
           </div>
-          <div className='row'>
-            <label>
-              <input type='radio' name='value' value='bank' ref='bank' onChange={this.handleRadio}/> Bank Account
-            </label>
-          </div>
-          <div className='row'>
-            <input type='radio' name='value' ref='cash' onChange={this.handleRadio}/> Cash Account
-            <label>
-            </label>
-          </div>
-          <div className='row'>
-            <label>
-              <input type='radio' name='value' ref='asset' onChange={this.handleRadio}/> Fixed Assets
-            </label>
-          </div>
-          <div className='row'>
-            <label>
-              <input type='radio' name='value' ref='share' onChange={this.handleRadio}/> Shareholders Capital
-            </label>
-          </div>
-          <div className='row'>
-            <label>
-              <input type='radio' name='value' ref='income' onChange={this.handleRadio}/> Income
-            </label>
-          </div>
-          <div className='row'>
-            <label>
-              <input type='radio' name='value' ref='expense' onChange={this.handleRadio}/> Expense
-            </label>
-          </div>
+          {renderUpdate()}
         </div>
       </div>
     )

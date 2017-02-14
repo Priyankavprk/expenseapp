@@ -15,6 +15,7 @@
     "mustache": "^2.2.1",
     "mysql": "^2.13.0",
     "node-uuid": "1.4.7",
+    "node-xlsx": "^0.7.4",
     "path": "^0.12.7",
     "querystring": "^0.2.0",
     "react": "^0.14.7",
